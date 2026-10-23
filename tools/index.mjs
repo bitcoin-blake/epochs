@@ -38,8 +38,9 @@ const SITE = 'https://bitcoin-blake.github.io/epochs/';
 const NET = { txbt4: 'Bitcoin BLAKE2b testnet4', xbt: 'Bitcoin BLAKE2b mainnet' };
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
 const page = (path, title, desc, islands, depth) => {
-  const up = '../'.repeat(depth); const url = SITE + path;
-  const head = `<!doctype html>\n<meta charset="utf-8"><title>${esc(title)}</title>\n<meta name="viewport" content="width=device-width, initial-scale=1">\n<meta name="description" content="${esc(desc)}">\n<link rel="canonical" href="${url}">\n<meta property="og:site_name" content="epochs">\n<meta property="og:title" content="${esc(title)}">\n<meta property="og:description" content="${esc(desc)}">\n<meta property="og:url" content="${url}">\n<link rel="icon" href="${up}favicon.svg" type="image/svg+xml">\n`;
+  const up = '../'.repeat(depth); const url = SITE + (path === 'index.html' ? '' : path);
+  const kind = depth ? (islands[0]['@type'] + ' · ') : ''; const og = kind + title; const d = desc.replace(/\s+/g, ' ').slice(0, 300);
+  const head = `<!doctype html>\n<meta charset="utf-8"><title>${esc(title)}</title>\n<meta name="viewport" content="width=device-width, initial-scale=1">\n<!-- ogp -->\n<meta name="description" content="${esc(d)}">\n<link rel="canonical" href="${url}">\n<meta property="og:site_name" content="epochs">\n<meta property="og:type" content="${depth ? 'article' : 'website'}">\n<meta property="og:title" content="${esc(og)}">\n<meta property="og:description" content="${esc(d)}">\n<meta property="og:url" content="${url}">\n<meta property="og:image" content="${SITE}og.png">\n<meta property="og:image:width" content="1200">\n<meta property="og:image:height" content="630">\n<meta name="twitter:card" content="summary_large_image">\n<meta name="twitter:title" content="${esc(og)}">\n<meta name="twitter:description" content="${esc(d)}">\n<meta name="twitter:image" content="${SITE}og.png">\n<link rel="icon" href="${SITE}favicon.svg" type="image/svg+xml">\n<!-- /ogp -->\n`;
   const body = islands.map((d) => `<script type="application/ld+json">\n${JSON.stringify(d, null, 2)}\n</script>`).join('\n');
   writeFileSync(path, head + body + `\n<script src="${up}wiki.js"></script>\n`);
 };
