@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>epochs</title>
+<meta name="description" content="Epoch packages for the BLAKE2b chains: one verifiable file per 2016-block epoch, with the UTXO set MuHash at both ends, served over HTTPS and torrents.">
+<style>
+  :root { --bg: #fff; --fg: #1a1a1a; --mute: #666; --line: #e3e3e3; --accent: #2456c8; --code: #f4f4f4; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg: #121314; --fg: #e8e8e8; --mute: #9a9a9a; --line: #2c2d2f; --accent: #7fa6ff; --code: #1d1e20; } }
+  :root[data-theme="dark"] { --bg: #121314; --fg: #e8e8e8; --mute: #9a9a9a; --line: #2c2d2f; --accent: #7fa6ff; --code: #1d1e20; }
+  body { margin: 0; padding: 32px 16px 64px; background: var(--bg); color: var(--fg); font: 16px/1.5 system-ui, sans-serif; }
+  main { max-width: 1040px; margin: 0 auto; }
+  h1 { font-size: 28px; margin: 0 0 4px; } .lead { color: var(--mute); margin: 0 0 28px; }
+  h2 { font-size: 20px; margin: 36px 0 10px; }
+  table { border-collapse: collapse; width: 100%; font-size: 14px; } th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--mute); font-weight: 600; } td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+  code { font: 13px/1.4 ui-monospace, monospace; background: var(--code); padding: 1px 4px; border-radius: 3px; word-break: break-all; }
+  a { color: var(--accent); } .mute { color: var(--mute); }
+  .wrap { overflow-x: auto; }
+  details { margin: 6px 0; } summary { cursor: pointer; }
+  dl { display: grid; grid-template-columns: max-content 1fr; gap: 4px 14px; margin: 8px 0 0; font-size: 14px; } dt { color: var(--mute); } dd { margin: 0; }
+</style>
+<main>
+  <h1>epochs</h1>
+  <p class="lead">One package per 2016-block epoch of a BLAKE2b chain: the UTXO set MuHash at both ends, which of the epoch's outputs are still unspent, and the older coins it spent. Enough to verify the epoch with no set. <a href="https://github.com/bitcoin-blake/epochs">source and format</a>.</p>
+  <div id="chains"><p class="mute">loading…</p></div>
+</main>
+<script>
+  const CHAINS = ['txbt4'];
+  const short = (h) => h.slice(0, 12) + '…';
+  const fmt = (n) => n.toLocaleString('en-US');
+  const el = (t, a = {}, ...kids) => { const e = document.createElement(t); for (const [k, v] of Object.entries(a)) k === 'class' ? (e.className = v) : e.setAttribute(k, v); e.append(...kids); return e; };
+  async function render() {
+    const root = document.getElementById('chains'); root.textContent = '';
+    for (const chain of CHAINS) {
+      let d; try { d = await (await fetch(`${chain}/index.json`, { cache: 'no-store' })).json(); } catch (e) { root.append(el('p', { class: 'mute' }, `${chain}: index not found`)); continue; }
+      root.append(el('h2', {}, `${chain} `, el('span', { class: 'mute' }, d.network)));
+      const tbl = el('table', {}, el('thead', {}, el('tr', {}, ...['epoch', 'blocks', 'txs', 'outputs', 'unspent', 'spent older', 'package', 'sha256', 'end MuHash', 'fetch'].map((h, i) => el('th', { class: [1, 2, 3, 4, 5].includes(i) ? 'num' : '' }, h)))));
+      const tb = el('tbody'); tbl.append(tb);
+      for (const e of d.epochs) {
+        const links = [el('a', { href: e.package.path }, 'https')];
+        if (e.torrent) { links.push(' · ', el('a', { href: e.torrent.path }, 'torrent'), ' · ', el('a', { href: e.torrent.magnet }, 'magnet')); }
+        tb.append(el('tr', {},
+          el('td', {}, `${fmt(e.start)} → ${fmt(e.end)}`), el('td', { class: 'num' }, fmt(e.blocks)), el('td', { class: 'num' }, fmt(e.txs)),
+          el('td', { class: 'num' }, fmt(e.outputs)), el('td', { class: 'num' }, fmt(e.unspent)), el('td', { class: 'num' }, fmt(e.spentOlder)),
+          el('td', { class: 'num' }, `${(e.package.bytes / 1024).toFixed(0)} KB`), el('td', {}, el('code', { title: e.package.sha256 }, short(e.package.sha256))),
+          el('td', {}, el('code', { title: e.endMuhash }, short(e.endMuhash))), el('td', {}, ...links)));
+      }
+      root.append(el('div', { class: 'wrap' }, tbl));
+      for (const e of d.epochs) {
+        const dl = el('dl', {});
+        const add = (k, v) => dl.append(el('dt', {}, k), el('dd', {}, typeof v === 'string' ? el('code', {}, v) : v));
+        add('start', `${e.start} ${e.startHash}`); add('start muhash', e.startMuhash); add('end', `${e.end} ${e.endHash}`); add('end muhash', e.endMuhash);
+        add('coins', `${fmt(e.coins.start)} → ${fmt(e.coins.end)}`); add('sha256', e.package.sha256); add('bytes', String(e.package.bytes));
+        if (e.torrent) { add('infohash', e.torrent.infohash); add('pieces', `${e.torrent.pieces} × ${e.torrent.pieceLength / 1024} KiB`); add('web seeds', el('span', {}, ...e.torrent.webseeds.flatMap((u, i) => [i ? el('br') : '', el('a', { href: u }, u)]))); }
+        add('built', `${e.built.at} by ${e.built.version} (${e.built.commit})`);
+        root.append(el('details', {}, el('summary', {}, `epoch ${fmt(e.start)} → ${fmt(e.end)}, full record`), dl));
+      }
+      root.append(el('p', { class: 'mute' }, `index updated ${d.updated}`));
+    }
+  }
+  render();
+</script>
+</html>
