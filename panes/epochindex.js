@@ -14,7 +14,7 @@ wiki.panes.push({
       const gh = el('tr', 'grp net-' + k); const gc = el('td'); gc.colSpan = 9; gc.append(el('span', 'type', k), ' ', NAMES[k] || groups.get(k)[0].chain || ''); gh.append(gc); t.append(gh);
       for (const e of groups.get(k).sort((a, b) => (b.end || 0) - (a.end || 0))) {
         const tr = el('tr', 'net-' + k);
-        const c = el('td'); c.append(link(e['@id'], `${n(e.start)} → ${n(e.end)}`)); tr.append(c);
+        const c = el('td'); c.style.whiteSpace = 'nowrap'; c.append(link(e['@id'], `${n(e.start)} → ${n(e.end)}`)); tr.append(c);
         for (const v of [e.blocks, e.txs, e.outputs, e.unspent, e.spentOlder]) tr.append(el('td', 'num', n(v)));
         const pc = el('td', 'num'); if (e.sha256) { const a = link(e['@id'], e.sha256.slice(0, 12) + '…'); a.title = 'sha256 ' + e.sha256; pc.append(a); pc.append(el('div', 'muted', e.bytes != null ? (e.bytes / 1024).toFixed(0) + ' KB' : '')); } else pc.append('?'); tr.append(pc);
         const mc = el('td', 'num'); if (e.endMuhash) { const s = el('span', null, e.endMuhash.slice(0, 12) + '…'); s.title = 'muhash ' + e.endMuhash; mc.append(s); } else mc.append('?'); tr.append(mc);
