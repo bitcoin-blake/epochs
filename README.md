@@ -36,6 +36,14 @@ Each package is served three ways and the bytes are the same whichever you use:
 
 Check what you got: `sha256sum <end>.json` against `index.json`.
 
+## The open epoch
+
+The epoch in progress, from the last boundary to the tip, is rebuilt every four hours and served from R2 as
+`epochs/<chain>-current.json`, for txbt4 https://pub-8cae8bad22cf4f44b22188af9b1c0064.r2.dev/epochs/txbt4-current.json.
+It has the same shape as a sealed package plus `sealed: false` and `boundary`, the height it seals at; its hints are
+provisional until then. It is mutable and not in this repo: when the boundary is reached it becomes `<chain>/<boundary>.json`
+here, with a torrent, and the open file starts over.
+
 ## Verifying
 
 ```
