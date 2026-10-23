@@ -5,7 +5,7 @@
   <text x="118" y="128" font-family="DejaVu Sans, sans-serif" font-size="26" font-weight="600" fill="#17160f">epochs</text>
   <text x="90" y="300" font-family="DejaVu Serif, serif" font-size="78" fill="#17160f">One package per epoch,</text>
   <text x="90" y="388" font-family="DejaVu Serif, serif" font-size="78" fill="#17160f">verifiable with no set.</text>
-  <text x="90" y="458" font-family="DejaVu Sans, sans-serif" font-size="27" fill="#78736a">BLAKE2b Bitcoin chains: the UTXO set muhash at both ends of every 2016 blocks,</text>
-  <text x="90" y="496" font-family="DejaVu Sans, sans-serif" font-size="27" fill="#78736a">which outputs are still unspent, the older coins spent · HTTPS · torrents · web seeds.</text>
+  <text x="90" y="458" font-family="DejaVu Sans, sans-serif" font-size="25" fill="#78736a">BLAKE2b Bitcoin chains: the UTXO set muhash at both ends of every 2016 blocks,</text>
+  <text x="90" y="496" font-family="DejaVu Sans, sans-serif" font-size="25" fill="#78736a">which outputs survive, which older coins were spent · HTTPS · torrents · web seeds.</text>
   <text x="90" y="560" font-family="DejaVu Sans Mono, monospace" font-size="24" fill="#c47a12">bitcoin-blake.github.io/epochs</text>
 </svg>
